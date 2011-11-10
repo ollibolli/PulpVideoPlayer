@@ -1,5 +1,9 @@
 package se.pulppuppets
 
+import org.junit.{Before, Test}
+import org.junit.Assert._
+import org.gstreamer.Gst
+
 /**
  * Created by IntelliJ IDEA.
  * User: bolliolle
@@ -9,5 +13,16 @@ package se.pulppuppets
  */
 
 class PulpDataTest {
+  var pD :MovieBuffer = null
 
+  @Before def init{
+    Gst.init
+    pD = new MovieBuffer
+  }
+
+  @Test def test_+=(){
+    assertEquals(0,pD.size)
+    pD.+=(new PulpBin("TEST1"))
+    assertEquals(1,pD.size)
+  }
 }

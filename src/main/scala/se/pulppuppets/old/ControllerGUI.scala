@@ -1,6 +1,5 @@
 package se.pulppuppets.old
 
-import java.awt.Dimension
 import swing._
 
 case object ControllerGUI extends Runnable {

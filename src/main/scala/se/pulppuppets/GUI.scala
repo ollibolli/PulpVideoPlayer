@@ -1,13 +1,42 @@
 package se.pulppuppets
 
-/**
- * Created by IntelliJ IDEA.
- * User: bolliolle
- * Date: 2011-09-24
- * Time: 09.58
- * To change this template use File | Settings | File Templates.
- */
 
-class GUI {
+
+import swing._
+
+case object GUI extends Runnable {
+
+  def run() {
+    val controllerFrame = new Frame {
+      title = "Controle"
+      contents = new FlowPanel {
+        contents += XSlider
+        contents += PreviousButton
+        contents += PlayPausButton
+        contents += NextButton
+      }
+      visible = true
+    }
+
+  }
+
 
 }
+object XSlider extends Slider{
+  max = 100
+  min = 0
+  value = 50
+}
+
+object NextButton extends Button {
+  text = "Next >"
+}
+
+object PlayPausButton extends Button {
+  text = "[ Stop ]"
+}
+
+object PreviousButton extends Button {
+  text = "< Prev"
+}
+

@@ -1,13 +1,8 @@
 package se.pulppuppets
 
-/**
- * Created by IntelliJ IDEA.
- * User: bolliolle
- * Date: 2011-11-08
- * Time: 00.08
- * To change this template use File | Settings | File Templates.
- */
+class WrongFileFormatException(msg:String) extends Exception(msg:String) {}
+class FileReadException(msg:String) extends Exception(msg:String) {}
+class NoVideoOutputException(msg:String) extends Exception(msg:String) {}
+class ParameterOutOfBoundsException(msg:String) extends Exception(msg:String) {}
+class NoSourceFileException(msg:String) extends Exception(msg:String) {}
 
-class Exceptions {
-
-}

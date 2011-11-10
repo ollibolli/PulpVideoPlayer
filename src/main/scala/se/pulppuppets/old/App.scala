@@ -29,6 +29,5 @@ object App
 class App {
 
 
-  }
 }
 

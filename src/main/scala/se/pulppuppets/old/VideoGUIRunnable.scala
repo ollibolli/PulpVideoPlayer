@@ -17,7 +17,7 @@ import org.gstreamer.{Element, GstObject, Bus, State}
 
 class VideoGUIRunnable(movie:File) extends Runnable{
   var inc = 50
-  var playBin = new PulpBin("player a")
+  var playBin = new MovieBuffer("player a")
   try {
     println(movie.getAbsolutePath)
     movie.canRead
@@ -69,7 +69,7 @@ class VideoGUIRunnable2(movie:Buffer[File]) extends Runnable with Player with Re
   var videoComponent: TransparentVideoComponent = null;
   var playState = true
   var index = 0;
-  //  var playBin = new PulpBin("firstMovie", movie(0), videoComponent)
+  //  var playBin = new MovieBuffer("firstMovie", movie(0), videoComponent)
   assert(movie(index).canRead)
   var playBin = new PulpBin("firstMovie")
   playBin.inputFile(movie(index))

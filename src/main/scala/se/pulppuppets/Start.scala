@@ -1,13 +1,17 @@
 package se.pulppuppets
 
-/**
- * Created by IntelliJ IDEA.
- * User: bolliolle
- * Date: 2011-09-18
- * Time: 22.59
- * To change this template use File | Settings | File Templates.
- */
+import scala.Array._
+import swing.SwingApplication
 
-object Start {
+object Start extends SwingApplication{
+  val videoPath = "/Users/bolliolle/Programering/scala/app/pulpVideoPlayer/target/classes/videos/"
 
+   override def main (args:Array[String]){
+
+    val app = new App()
+    app.init(Array(videoPath+"kort4.ogg",videoPath+"part2.ogg"));
+    app.run();
+  }
+
+  def startup(args: Array[String]) {}
 }

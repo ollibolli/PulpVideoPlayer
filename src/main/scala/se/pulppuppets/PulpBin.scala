@@ -5,119 +5,62 @@ import org.gstreamer.swing.VideoComponent
 import collection.mutable.ListBuffer
 import org.gstreamer.elements.{DecodeBin2, FileSrc, PlayBin2}
 import org.gstreamer._
-import elements.DecodeBin2
-import org.gstreamer.Bus
+import elements.DecodeBin2.REMOVED_DECODED_PAD
+import event.SeekEvent
+import org.gstreamer.Bus._
+import java.util.concurrent.TimeUnit
 
 object PulpBin{
-
 }
-
-/*class PulpData (name:String) extends Bin{
-  val bin
-
-
-
-  val playbin = new PlayBin2(name)
-
-  def getElements():java.util.List[Element] = {
-    return playbin.getElements
-  }
-
-  def videoSink(videosink :Element) = playbin.setVideoSink(videosink)
-
-  def setInputFile(file: File) = {
-    playbin.setInputFile(file)
-  }
-  def play() = {
-    playbin.setState(State.PLAYING)
-  }
-
-  def paus() = {
-    playbin.setState(State.PAUSED)
-  }
-
-  def state:State = {
-      return playbin.getState()
-  }
-
-} */
-
-
-
 /*
 reference
 http://massapi.com/source/gstreamer-java-read-only/gstreamer-java/src/org/gstreamer/example/DecodeBinPlayer.java.html*/
-class PulpBin(name:String) extends Pipeline {
-  final val GST_NAME: String = "pulpplaybin"
+class PulpBin(name:String) extends PlayBin2(name) { //Pipeline
+  final val GST_NAME: String = "pulpBin"
 
-  val decodeBin = new DecodeBin2("Decode Bin");
-  /*Video */
-  val src = ElementFactory.make("filesrc","Source").asInstanceOf[FileSrc]
-  val decodeQueue = ElementFactory.make("queue", "Decode Queue");
-  addMany(src, decodeQueue, decodeBin);
-  Element.linkMany(src, decodeQueue, decodeBin);
+  var rate : Double = 1.0
+  var startTime:Long = null.asInstanceOf[Long]
+  var stopTime:Long = null.asInstanceOf[Long]
+  var sourcePath:String =""
+  var alpha:Double = null.asInstanceOf[Double]
 
-  /* Audiobin */
-  val audioBin = new Bin("Audio Bin");
-  val conv = ElementFactory.make("audioconvert", "Audio Convert");
-  val resample = ElementFactory.make("audioresample", "Audio Resample");
-  val audioSink = ElementFactory.make("autoaudiosink", "sink");
+  private var fps : Double = this.getVideoSinkFrameRate
 
-  audioBin.addMany(conv, resample, audioSink);
-  Element.linkMany(conv, resample, audioSink);
-  audioBin.addPad(new GhostPad("sink", conv.getStaticPad("sink")));
-  add(audioBin)
+  private def implSeek(rate:Double) {
+    do {
+      this.pause()
+      Thread.sleep(5)
+    } while (this.getState != State.PAUSED)
 
-  decodeBin.connect(new DecodeBin2.NEW_DECODED_PAD() {
-
-    def newDecodedPad(elem:DecodeBin2,pad: Pad, last:Boolean) {
-      /* only link once */
-      if (pad.isLinked()) {
-        return;
-      }
-      /* check media type */
-      println("pad: "+ pad.toString)
-      val caps = pad.getCaps();
-      val struct = caps.getStructure(0);
-      if (struct.getName().startsWith("audio/")) {
-        println("Linking audio pad: " + struct.getName());
-        pad.link(audioBin.getStaticPad("sink"));
-      } else if (struct.getName().startsWith("video/")) {
-        println("Linking video pad: " + struct.getName());
-        val sink = getElementByName("GstVideoComponent")
-        pad.link(sink.getStaticPad("sink"));
-      } else {
-        println("Unknown pad [" + struct.getName() + "]");
-      }
+    var fps = this.fps
+    val ifps:Double = 30
+    val f:Double = { if (0 < ifps && 0 < fps) ifps / fps else 1}
+    val timePossition:Long = this.queryPosition(TimeUnit.NANOSECONDS);
+    val timeDuration:Long = this.queryDuration(TimeUnit.NANOSECONDS);
+    printf("Pulpbin impSeek %d" ,timeDuration)
+    var res:Boolean = false
+    var start : Long = null.asInstanceOf[Long]
+    var stop :Long = null.asInstanceOf[Long]
+    if (rate > 0) {
+      start = timePossition;
+      stop = -1;
+    } else {
+      start = 0;
+      stop = timePossition;
     }
-  });
+    res = this.seek(rate * f, Format.TIME, SeekFlags.FLUSH, SeekType.SET, start, SeekType.SET, stop);
 
-
-  val bus = getBus();
-  bus.connect(new Bus.ERROR() {
-     def errorMessage( source: GstObject,code:Int, message:String ) {
-        println("Error: code=" + code + " message=" + message);
-     }
-  });
-  bus.connect(new Bus.INFO {
-      def infoMessage(source: GstObject, code: Int, message: String) {
-        println("code="+ code + " message=" + message);
-      }
-  })
-
-  def inputFile(file:File){
-    src.setLocation(file);
+    if (!res) {
+      throw new RuntimeException("Change rate faild")
+    }
+    this.fps=ifps
   }
 
-  def state{
-    getState()
+  override def play() = {
+     implSeek(this.rate)
+     super.play();
   }
-
 }
-
-
-
-
 /*
 
 
